@@ -63,6 +63,12 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Captures d'écran Robolectric uniquement sur demande : ./gradlew testDebugUnitTest -Pscreenshots
+            it.systemProperty("azur.screenshots", providers.gradleProperty("screenshots").isPresent.toString())
+            it.systemProperty("azur.screenshotDir", layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
+        }
     }
 
     lint {
@@ -115,4 +121,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.junit)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

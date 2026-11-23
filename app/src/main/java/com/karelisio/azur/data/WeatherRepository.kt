@@ -7,9 +7,11 @@ import com.karelisio.azur.data.net.OpenMeteoApi
 import com.karelisio.azur.data.net.OpenMeteoParser
 import com.karelisio.azur.domain.AirQuality
 import com.karelisio.azur.domain.Forecast
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /** Données météo prêtes à afficher pour un lieu (issues du cache). */
@@ -29,6 +31,11 @@ class WeatherRepository(
     private val settings: SettingsRepository,
 ) {
     fun observe(placeId: Long): Flow<PlaceWeather?> = db.cache().observe(placeId).map { it?.toWeather() }
+
+    /** Toutes les données en cache, par identifiant de lieu (analyse hors du thread principal). */
+    fun observeAll(): Flow<Map<Long, PlaceWeather>> = db.cache().observeAll()
+        .map { list -> list.mapNotNull { it.toWeather() }.associateBy { it.placeId } }
+        .flowOn(Dispatchers.Default)
 
     suspend fun cached(placeId: Long): PlaceWeather? = db.cache().get(placeId)?.toWeather()
 

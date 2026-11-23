@@ -47,6 +47,9 @@ interface ForecastCacheDao {
     @Query("SELECT * FROM forecast_cache WHERE placeId = :placeId")
     fun observe(placeId: Long): Flow<ForecastCacheEntity?>
 
+    @Query("SELECT * FROM forecast_cache")
+    fun observeAll(): Flow<List<ForecastCacheEntity>>
+
     @Query("SELECT * FROM forecast_cache WHERE placeId = :placeId")
     suspend fun get(placeId: Long): ForecastCacheEntity?
 
