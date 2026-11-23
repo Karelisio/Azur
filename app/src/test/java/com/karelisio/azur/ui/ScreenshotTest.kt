@@ -45,7 +45,7 @@ class ScreenshotTest {
             placeId = 1,
             forecast = OpenMeteoParser.parseForecast(Fixtures.read("forecast_grenoble_mf.json")),
             air = OpenMeteoParser.parseAirQuality(Fixtures.read("air_quality_grenoble.json")),
-            altitude = null, altitudeMeters = null, vigilanceJson = null,
+            altitude = null, altitudeMeters = null, vigilance = null,
             fetchedAt = System.currentTimeMillis(),
         )
     }

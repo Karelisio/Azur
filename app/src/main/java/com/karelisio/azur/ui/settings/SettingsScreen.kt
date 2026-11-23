@@ -71,6 +71,8 @@ import com.karelisio.azur.domain.PrecipUnit
 import com.karelisio.azur.domain.PressureUnit
 import com.karelisio.azur.domain.TempUnit
 import com.karelisio.azur.domain.WindUnit
+import com.karelisio.azur.permissions.AzurPermission
+import com.karelisio.azur.permissions.rememberAzurPermission
 import com.karelisio.azur.ui.onboarding.UnitChooser
 import com.karelisio.azur.ui.update.UpdateViewModel
 import kotlin.math.roundToInt
@@ -90,6 +92,8 @@ fun SettingsScreen(
     val snackbar = remember { SnackbarHostState() }
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var showTime by remember { mutableStateOf(false) }
+    val notifications = rememberAzurPermission(AzurPermission.NOTIFICATIONS)
+    fun ensureNotifications() { if (!notifications.granted) notifications.request() }
     LaunchedEffect(update.message) { update.message?.let { snackbar.showSnackbar(it); updateVm.clearMessage() } }
     fun open(url: String) = runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
 
@@ -133,12 +137,12 @@ fun SettingsScreen(
             }
             item {
                 Section("Notifications", Icons.Rounded.Notifications) {
-                    SwitchRow("Pluie dans l'heure", "Vérification toutes les 15 min pour votre position", s.rainAlerts) { vm.setRainAlerts(it) }
+                    SwitchRow("Pluie dans l'heure", "Vérification toutes les 15 min pour votre position", s.rainAlerts) { if (it) ensureNotifications(); vm.setRainAlerts(it) }
                     SwitchRow(
                         "Résumé du matin",
                         "Chaque jour à %d h %02d".format(s.morningHour, s.morningMinute),
                         s.morningEnabled,
-                    ) { vm.setMorning(it, s.morningHour, s.morningMinute) }
+                    ) { if (it) ensureNotifications(); vm.setMorning(it, s.morningHour, s.morningMinute) }
                     if (s.morningEnabled) TextButton(onClick = { showTime = true }) { Text("Changer l'heure") }
                 }
             }
@@ -172,7 +176,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Row {
-                        TextButton(onClick = { vm.setVigilanceKey(key) }, enabled = key != s.vigilanceApiKey) { Text("Enregistrer") }
+                        TextButton(onClick = { if (key.isNotBlank()) ensureNotifications(); vm.setVigilanceKey(key) }, enabled = key != s.vigilanceApiKey) { Text("Enregistrer") }
                         TextButton(onClick = { open("https://portail-api.meteofrance.fr") }) { Text("Obtenir une clé") }
                     }
                 }

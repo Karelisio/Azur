@@ -48,7 +48,7 @@ fun WeatherPage(
     onRefresh: () -> Unit,
     onDayClick: (Int) -> Unit,
     heroIcon: @Composable (PlaceWeather) -> Unit = { WeatherIconImage(it.forecast.current.condition, it.forecast.current.isDay, Modifier.size(96.dp)) },
-    banner: @Composable (PlaceWeather) -> Unit = {},
+    banner: @Composable (PlaceWeather) -> Unit = { d -> d.vigilance?.let { VigilanceBanner(it, place.name) } },
     extraCards: @Composable (PlaceWeather) -> Unit = {},
 ) {
     PullToRefreshBox(isRefreshing = refreshing && data != null, onRefresh = onRefresh, modifier = Modifier.fillMaxSize()) {

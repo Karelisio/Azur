@@ -3,10 +3,13 @@ package com.karelisio.azur.data
 import com.karelisio.azur.data.db.AzurDatabase
 import com.karelisio.azur.data.db.ForecastCacheEntity
 import com.karelisio.azur.data.db.PlaceEntity
+import com.karelisio.azur.data.net.AzurJson
 import com.karelisio.azur.data.net.OpenMeteoApi
+import com.karelisio.azur.data.net.VigilanceApi
 import com.karelisio.azur.data.net.OpenMeteoParser
 import com.karelisio.azur.domain.AirQuality
 import com.karelisio.azur.domain.Forecast
+import com.karelisio.azur.domain.Vigilance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -21,13 +24,14 @@ data class PlaceWeather(
     val air: AirQuality?,
     val altitude: Forecast?,
     val altitudeMeters: Int?,
-    val vigilanceJson: String?,
+    val vigilance: Vigilance?,
     val fetchedAt: Long,
 )
 
 class WeatherRepository(
     private val db: AzurDatabase,
     private val api: OpenMeteoApi,
+    private val vigilanceApi: VigilanceApi,
     private val settings: SettingsRepository,
     /** Appelé après chaque mise à jour réussie (widgets, tuile). */
     private val onUpdated: suspend () -> Unit = {},
@@ -54,6 +58,13 @@ class WeatherRepository(
                     runCatching { api.forecastAtAltitude(place.latitude, place.longitude, s.mountainAltitude) }.getOrNull()
                 } else null
             }
+            val vigilance = async {
+                val dept = place.department
+                if (s.vigilanceApiKey.isNotBlank() && dept != null) {
+                    runCatching { vigilanceApi.fetch(s.vigilanceApiKey, dept) }.getOrNull()
+                        ?.let { AzurJson.encodeToString(Vigilance.serializer(), it) }
+                } else null
+            }
             val forecastJson = forecast.await()
             OpenMeteoParser.parseForecast(forecastJson) // valide avant d'écraser le cache
             val previous = db.cache().get(place.id)
@@ -65,7 +76,7 @@ class WeatherRepository(
                     airJson = air.await() ?: previous?.airJson,
                     altitudeJson = altitude.await(),
                     altitude = if (s.mountainEnabled) s.mountainAltitude else null,
-                    vigilanceJson = previous?.vigilanceJson,
+                    vigilanceJson = if (s.vigilanceApiKey.isBlank()) null else vigilance.await() ?: previous?.vigilanceJson,
                 ),
             )
         }
@@ -73,9 +84,14 @@ class WeatherRepository(
         Unit
     }
 
-    suspend fun saveVigilance(placeId: Long, json: String?) {
-        val previous = db.cache().get(placeId) ?: return
-        db.cache().upsert(previous.copy(vigilanceJson = json))
+    /** Met à jour uniquement la vigilance (tâche horaire). Renvoie la vigilance obtenue. */
+    suspend fun refreshVigilance(place: PlaceEntity): Vigilance? {
+        val key = settings.current().vigilanceApiKey
+        val dept = place.department ?: return null
+        if (key.isBlank()) return null
+        val v = vigilanceApi.fetch(key, dept) ?: return null
+        db.cache().get(place.id)?.let { db.cache().upsert(it.copy(vigilanceJson = AzurJson.encodeToString(Vigilance.serializer(), v))) }
+        return v
     }
 
     private fun ForecastCacheEntity.toWeather(): PlaceWeather? = runCatching {
@@ -85,7 +101,7 @@ class WeatherRepository(
             air = airJson?.let { runCatching { OpenMeteoParser.parseAirQuality(it) }.getOrNull() },
             altitude = altitudeJson?.let { runCatching { OpenMeteoParser.parseForecast(it) }.getOrNull() },
             altitudeMeters = altitude,
-            vigilanceJson = vigilanceJson,
+            vigilance = vigilanceJson?.let { runCatching { AzurJson.decodeFromString(Vigilance.serializer(), it) }.getOrNull() },
             fetchedAt = fetchedAt,
         )
     }.getOrNull()
