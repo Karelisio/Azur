@@ -49,6 +49,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -59,7 +60,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.karelisio.azur.data.PlaceWeather
 import com.karelisio.azur.data.db.PlaceEntity
-import com.karelisio.azur.ui.sky.GradientSky
+import com.karelisio.azur.ui.sky.LiveSky
 import com.karelisio.azur.ui.sky.SkyState
 import com.karelisio.azur.ui.sky.dayPhase
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -92,7 +93,7 @@ fun HomeScreen(
     onOpenRadar: () -> Unit,
     onOpenDay: (Long, Int) -> Unit,
     onUseLocation: (() -> Unit)?,
-    sky: @Composable (SkyState, Modifier) -> Unit = { s, m -> GradientSky(s, m) },
+    sky: @Composable (SkyState, Modifier) -> Unit = { s, m -> LiveSky(s, m) },
     page: @Composable (PlaceEntity, PlaceWeather?, Boolean, androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp) -> Unit,
 ) {
     val places by vm.places.collectAsStateWithLifecycle()
@@ -135,6 +136,11 @@ fun HomeScreen(
                 page(place, weather[place.id], place.id in vm.refreshing.collectAsStateWithLifecycle().value, top, bottom)
             }
         }
+        // Voile en haut pour garder la barre lisible quand le contenu défile dessous.
+        Box(
+            Modifier.fillMaxWidth().height(top + 16.dp)
+                .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.28f), Color.Transparent))),
+        )
         TopBar(
             places = list.orEmpty(),
             current = pager.currentPage,

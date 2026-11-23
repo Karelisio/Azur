@@ -12,6 +12,8 @@
 - `./gradlew assembleRelease lint testDebugUnitTest` : vérification complète (comme la CI).
 - `./gradlew testDebugUnitTest` : tests unitaires (fixtures JSON dans `app/src/test/resources`).
 - `./gradlew installDebug` : installe `com.karelisio.azur.debug`.
+- `./gradlew testDebugUnitTest -Pscreenshots` : captures Robolectric dans `app/build/screenshots`.
+- Pas de KVM ici : vérifier l'UI via ces captures ; le shader AGSL est compilé par `SkyShaderTest`.
 - Version : fichier `VERSION` (X.Y.Z) ; versionCode = `-PversionCode` ou `GITHUB_RUN_NUMBER`.
 
 ## Architecture (`app/src/main/java/com/karelisio/azur`)

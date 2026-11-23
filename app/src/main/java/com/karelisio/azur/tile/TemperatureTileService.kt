@@ -1,5 +1,6 @@
 package com.karelisio.azur.tile
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
@@ -52,6 +53,7 @@ class TemperatureTileService : TileService() {
         super.onStopListening()
     }
 
+    @SuppressLint("StartActivityAndCollapseDeprecated") // seule API disponible avant Android 14
     override fun onClick() {
         super.onClick()
         val intent = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

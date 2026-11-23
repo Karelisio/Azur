@@ -31,6 +31,7 @@ import com.karelisio.azur.data.db.PlaceEntity
 import com.karelisio.azur.domain.RainDetector
 import com.karelisio.azur.domain.SummaryGenerator
 import com.karelisio.azur.ui.components.AzurCard
+import com.karelisio.azur.ui.components.ConditionBadge
 import com.karelisio.azur.ui.components.WeatherIconImage
 import com.karelisio.azur.ui.components.cascade
 import com.karelisio.azur.ui.nav.sharedBoundsIfAvailable
@@ -47,7 +48,7 @@ fun WeatherPage(
     bottomPadding: androidx.compose.ui.unit.Dp,
     onRefresh: () -> Unit,
     onDayClick: (Int) -> Unit,
-    heroIcon: @Composable (PlaceWeather) -> Unit = { WeatherIconImage(it.forecast.current.condition, it.forecast.current.isDay, Modifier.size(96.dp)) },
+    heroIcon: @Composable (PlaceWeather) -> Unit = { ConditionBadge(it.forecast.current.condition, it.forecast.current.isDay) },
     banner: @Composable (PlaceWeather) -> Unit = { d -> d.vigilance?.let { VigilanceBanner(it, place.name) } },
     extraCards: @Composable (PlaceWeather) -> Unit = { d ->
         if (settings.mountainEnabled) {

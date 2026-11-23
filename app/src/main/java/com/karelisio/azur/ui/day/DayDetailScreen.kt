@@ -44,7 +44,7 @@ import com.karelisio.azur.ui.home.HomeViewModel
 import com.karelisio.azur.ui.home.HourlyStrip
 import com.karelisio.azur.ui.home.skyStateOf
 import com.karelisio.azur.ui.nav.sharedBoundsIfAvailable
-import com.karelisio.azur.ui.sky.GradientSky
+import com.karelisio.azur.ui.sky.LiveSky
 import com.karelisio.azur.ui.sky.SkyState
 import com.karelisio.azur.ui.theme.AzurText
 import java.time.Instant
@@ -59,7 +59,7 @@ fun DayDetailScreen(
     placeId: Long,
     dayIndex: Int,
     onBack: () -> Unit,
-    sky: @Composable (SkyState, Modifier) -> Unit = { s, m -> GradientSky(s, m) },
+    sky: @Composable (SkyState, Modifier) -> Unit = { s, m -> LiveSky(s, m) },
 ) {
     val weather by vm.weather.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()

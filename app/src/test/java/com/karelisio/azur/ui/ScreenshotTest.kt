@@ -1,7 +1,9 @@
 package com.karelisio.azur.ui
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -35,6 +37,7 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w400dp-h2800dp-xhdpi")
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 class ScreenshotTest {
     @get:Rule val compose = createComposeRule()
 
@@ -66,6 +69,21 @@ class ScreenshotTest {
 
     @Test fun homeDark() = shot("home_dark", dark = true) { Page() }
 
+    @Test fun icons() = shot("icons") {
+        androidx.compose.foundation.layout.FlowRow(
+            Modifier.fillMaxSize().androidx_background(),
+        ) {
+            listOf(0, 2, 3, 45, 53, 63, 65, 56, 73, 95).forEach { code ->
+                listOf(true, false).forEach { day ->
+                    com.karelisio.azur.ui.components.AnimatedWeatherIcon(
+                        com.karelisio.azur.domain.WeatherCondition.fromWmo(code), day,
+                        Modifier.androidx_size(),
+                    )
+                }
+            }
+        }
+    }
+
     @Composable private fun Page() {
         Box(Modifier.fillMaxSize()) {
             GradientSky(skyStateOf(data), Modifier.fillMaxSize())
@@ -77,3 +95,6 @@ class ScreenshotTest {
         }
     }
 }
+
+private fun Modifier.androidx_background() = this.then(Modifier.background(androidx.compose.ui.graphics.Color(0xFF5B8DEF)))
+private fun Modifier.androidx_size() = this.then(Modifier.size(96.dp))
