@@ -11,6 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,13 +46,17 @@ class MainActivity : ComponentActivity() {
             }
         }
         val reduceMotion = isReduceMotion()
+        var startOnboarding: Boolean? by mutableStateOf(null)
+        splash.setKeepOnScreenCondition { startOnboarding == null }
+        lifecycleScope.launch { startOnboarding = !container.settings.current().onboardingDone }
         setContent {
+            val start = startOnboarding ?: return@setContent
             AzurTheme {
                 CompositionLocalProvider(LocalReduceMotion provides reduceMotion) {
                     val updateVm = azurViewModel { UpdateViewModel(it.updates) }
                     val updateState by updateVm.state.collectAsStateWithLifecycle()
                     Surface(color = MaterialTheme.colorScheme.surface) {
-                        AzurNavHost(updateVm = updateVm, startOnboarding = false)
+                        AzurNavHost(updateVm = updateVm, startOnboarding = start)
                     }
                     UpdateSheet(updateState, updateVm)
                     androidx.compose.runtime.LaunchedEffect(Unit) { updateVm.check() }

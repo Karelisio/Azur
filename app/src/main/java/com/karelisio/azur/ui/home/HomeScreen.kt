@@ -101,7 +101,7 @@ fun HomeScreen(
     val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refreshAllStale() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refreshAllStale(); vm.updateLocation() }
     LaunchedEffect(places) { vm.refreshAllStale() }
 
     val list = places

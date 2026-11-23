@@ -3,6 +3,7 @@ package com.karelisio.azur.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.karelisio.azur.data.AppSettings
+import com.karelisio.azur.data.CurrentLocationUpdater
 import com.karelisio.azur.data.PlaceRepository
 import com.karelisio.azur.data.PlaceWeather
 import com.karelisio.azur.data.SettingsRepository
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
+    private val locationUpdater: CurrentLocationUpdater,
     private val placeRepo: PlaceRepository,
     private val weatherRepo: WeatherRepository,
     settingsRepo: SettingsRepository,
@@ -44,6 +46,18 @@ class HomeViewModel(
                 if (force || cached == null) _messages.send("Impossible d'actualiser ${place.name} : hors ligne ?")
             }
             _refreshing.update { it - place.id }
+        }
+    }
+
+    private var locating = false
+
+    /** Met à jour la position actuelle (si autorisée) puis sa météo. */
+    fun updateLocation(force: Boolean = false) {
+        if (locating) return
+        locating = true
+        viewModelScope.launch {
+            runCatching { locationUpdater.update() }.getOrNull()?.let { refresh(it, force) }
+            locating = false
         }
     }
 

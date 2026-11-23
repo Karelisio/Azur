@@ -10,7 +10,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.karelisio.azur.permissions.AzurPermission
+import com.karelisio.azur.permissions.rememberAzurPermission
 import com.karelisio.azur.ui.components.azurViewModel
+import com.karelisio.azur.ui.onboarding.OnboardingScreen
+import com.karelisio.azur.ui.onboarding.OnboardingViewModel
+import com.karelisio.azur.ui.permissions.PermissionsScreen
 import com.karelisio.azur.ui.day.DayDetailScreen
 import com.karelisio.azur.ui.home.HomeScreen
 import com.karelisio.azur.ui.home.HomeViewModel
@@ -19,6 +24,7 @@ import com.karelisio.azur.ui.places.PlacesScreen
 import com.karelisio.azur.ui.places.PlacesViewModel
 import com.karelisio.azur.ui.places.SearchScreen
 import com.karelisio.azur.ui.settings.SettingsScreen
+import com.karelisio.azur.ui.settings.SettingsViewModel
 import com.karelisio.azur.ui.update.UpdateViewModel
 
 private const val SELECT_PLACE = "selectPlace"
@@ -27,12 +33,22 @@ private const val SELECT_PLACE = "selectPlace"
 @Composable
 fun AzurNavHost(updateVm: UpdateViewModel, startOnboarding: Boolean) {
     val nav = rememberNavController()
-    val homeVm = azurViewModel { HomeViewModel(it.places, it.weather, it.settings) }
+    val homeVm = azurViewModel { HomeViewModel(it.locationUpdater, it.places, it.weather, it.settings) }
     val placesVm = azurViewModel { PlacesViewModel(it.places) }
     SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedScope provides this) {
-            NavHost(navController = nav, startDestination = HomeRoute) {
+            NavHost(navController = nav, startDestination = if (startOnboarding) OnboardingRoute else HomeRoute) {
+                composable<OnboardingRoute> {
+                    val vm = azurViewModel { OnboardingViewModel(it.settings, it.locationUpdater, it.weather) }
+                    OnboardingScreen(vm, onFinished = {
+                        nav.navigate(HomeRoute) { popUpTo<OnboardingRoute> { inclusive = true } }
+                    })
+                }
+                composable<PermissionsRoute> {
+                    PermissionsScreen(onBack = { nav.popBackStack() }, onLocationGranted = { homeVm.updateLocation(force = true) })
+                }
                 composable<HomeRoute> { entry ->
+                    val location = rememberAzurPermission(AzurPermission.LOCATION) { if (it) homeVm.updateLocation(force = true) }
                     val selected by entry.savedStateHandle.getStateFlow<Long?>(SELECT_PLACE, null).collectAsStateWithLifecycle()
                     val settings by homeVm.settings.collectAsStateWithLifecycle()
                     CompositionLocalProvider(LocalNavAnimatedScope provides this) {
@@ -45,7 +61,7 @@ fun AzurNavHost(updateVm: UpdateViewModel, startOnboarding: Boolean) {
                             onOpenSettings = { nav.navigate(SettingsRoute) },
                             onOpenRadar = { nav.navigate(RadarRoute) },
                             onOpenDay = { id, i -> nav.navigate(DayRoute(id, i)) },
-                            onUseLocation = null,
+                            onUseLocation = { if (location.granted) homeVm.updateLocation(force = true) else location.request() },
                         ) { place, data, refreshing, top, bottom ->
                             WeatherPage(
                                 place = place, data = data, settings = settings, refreshing = refreshing,
@@ -82,10 +98,12 @@ fun AzurNavHost(updateVm: UpdateViewModel, startOnboarding: Boolean) {
                     })
                 }
                 composable<RadarRoute> {
-                    SettingsScreen(updateVm = updateVm, onBack = { nav.popBackStack() })
+                    val vm = azurViewModel { SettingsViewModel(it) }
+                    SettingsScreen(vm, updateVm, onBack = { nav.popBackStack() }, onOpenPermissions = { nav.navigate(PermissionsRoute) })
                 }
                 composable<SettingsRoute> {
-                    SettingsScreen(updateVm = updateVm, onBack = { nav.popBackStack() })
+                    val vm = azurViewModel { SettingsViewModel(it) }
+                    SettingsScreen(vm, updateVm, onBack = { nav.popBackStack() }, onOpenPermissions = { nav.navigate(PermissionsRoute) })
                 }
             }
         }
