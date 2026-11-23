@@ -2,9 +2,12 @@ package com.karelisio.azur
 
 import android.app.Application
 import android.content.Context
+import com.karelisio.azur.data.PlaceRepository
 import com.karelisio.azur.data.SettingsRepository
+import com.karelisio.azur.data.WeatherRepository
 import com.karelisio.azur.data.db.AzurDatabase
 import com.karelisio.azur.data.net.Http
+import com.karelisio.azur.data.net.OpenMeteoApi
 import com.karelisio.azur.update.UpdateRepository
 
 class AzurApplication : Application() {
@@ -23,6 +26,9 @@ class AppContainer(context: Context) {
     val database = AzurDatabase.build(context)
     val settings = SettingsRepository(context)
     val updates = UpdateRepository(context, http, settings)
+    val openMeteo = OpenMeteoApi(http)
+    val places = PlaceRepository(database, openMeteo)
+    val weather = WeatherRepository(database, openMeteo, settings)
 }
 
 val Context.container: AppContainer get() = (applicationContext as AzurApplication).container
