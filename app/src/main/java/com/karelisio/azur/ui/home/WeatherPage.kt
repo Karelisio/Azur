@@ -49,7 +49,11 @@ fun WeatherPage(
     onDayClick: (Int) -> Unit,
     heroIcon: @Composable (PlaceWeather) -> Unit = { WeatherIconImage(it.forecast.current.condition, it.forecast.current.isDay, Modifier.size(96.dp)) },
     banner: @Composable (PlaceWeather) -> Unit = { d -> d.vigilance?.let { VigilanceBanner(it, place.name) } },
-    extraCards: @Composable (PlaceWeather) -> Unit = {},
+    extraCards: @Composable (PlaceWeather) -> Unit = { d ->
+        if (settings.mountainEnabled) {
+            com.karelisio.azur.ui.mountain.MountainCard(d, settings.units, System.currentTimeMillis() / 1000, settings.mountainAltitude)
+        }
+    },
 ) {
     PullToRefreshBox(isRefreshing = refreshing && data != null, onRefresh = onRefresh, modifier = Modifier.fillMaxSize()) {
         if (data == null) {
@@ -107,6 +111,7 @@ fun WeatherPage(
                     }
                 }
             }
+            if (settings.mountainEnabled) item(key = "extra") { Box(Modifier.cascade(3)) { extraCards(data) } }
             item(key = "row1") {
                 Row(Modifier.cascade(3), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     UvCard(f.current.uvIndex ?: f.today(now)?.uvIndexMax, Modifier.weight(1f))
@@ -132,7 +137,6 @@ fun WeatherPage(
                 }
             }
             data.air?.let { air -> item(key = "air") { Box(Modifier.cascade(7)) { AirQualityCard(air) } } }
-            item(key = "extra") { extraCards(data) }
             item(key = "footer") { SourcesFooter(data.fetchedAt); Spacer(Modifier.height(8.dp).padding()) }
         }
     }

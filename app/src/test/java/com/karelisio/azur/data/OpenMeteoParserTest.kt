@@ -119,3 +119,14 @@ class OpenMeteoParserTest {
         assertTrue(url.queryParameter("hourly")!!.contains("temperature_850hPa"))
     }
 }
+
+class RainViewerTest {
+    @org.junit.Test fun tileUrl() {
+        val json = """{"version":"2.0","generated":1795437000,"host":"https://tilecache.rainviewer.com",
+            "radar":{"past":[{"time":1795436400,"path":"/v2/radar/abc"},{"time":1795437000,"path":"/v2/radar/def"}],"nowcast":[]},
+            "satellite":{"infrared":[]}}"""
+        val maps = com.karelisio.azur.data.net.AzurJson.decodeFromString(com.karelisio.azur.data.net.RainViewerMaps.serializer(), json)
+        org.junit.Assert.assertEquals(2, maps.frames.size)
+        org.junit.Assert.assertEquals("https://tilecache.rainviewer.com/v2/radar/def/256/{z}/{x}/{y}/2/1_1.png", maps.tileUrl(maps.frames[1]))
+    }
+}

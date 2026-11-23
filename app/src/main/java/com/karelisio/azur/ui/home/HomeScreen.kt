@@ -102,7 +102,8 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refreshAllStale(); vm.updateLocation() }
-    LaunchedEffect(places) { vm.refreshAllStale() }
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    LaunchedEffect(places, settings.mountainEnabled, settings.mountainAltitude, settings.vigilanceApiKey) { vm.refreshAllStale() }
 
     val list = places
     val pager = rememberPagerState { list?.size ?: 0 }

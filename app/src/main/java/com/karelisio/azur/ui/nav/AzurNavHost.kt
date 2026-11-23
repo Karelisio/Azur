@@ -23,6 +23,9 @@ import com.karelisio.azur.ui.home.WeatherPage
 import com.karelisio.azur.ui.places.PlacesScreen
 import com.karelisio.azur.ui.places.PlacesViewModel
 import com.karelisio.azur.ui.places.SearchScreen
+import com.karelisio.azur.data.net.RainViewerApi
+import com.karelisio.azur.ui.radar.RadarScreen
+import com.karelisio.azur.ui.radar.RadarViewModel
 import com.karelisio.azur.ui.settings.SettingsScreen
 import com.karelisio.azur.ui.settings.SettingsViewModel
 import com.karelisio.azur.ui.update.UpdateViewModel
@@ -98,8 +101,8 @@ fun AzurNavHost(updateVm: UpdateViewModel, startOnboarding: Boolean) {
                     })
                 }
                 composable<RadarRoute> {
-                    val vm = azurViewModel { SettingsViewModel(it) }
-                    SettingsScreen(vm, updateVm, onBack = { nav.popBackStack() }, onOpenPermissions = { nav.navigate(PermissionsRoute) })
+                    val vm = azurViewModel { RadarViewModel(RainViewerApi(it.http), it.places) }
+                    RadarScreen(vm, onBack = { nav.popBackStack() })
                 }
                 composable<SettingsRoute> {
                     val vm = azurViewModel { SettingsViewModel(it) }

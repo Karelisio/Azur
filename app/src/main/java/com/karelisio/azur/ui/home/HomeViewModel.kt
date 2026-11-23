@@ -39,7 +39,9 @@ class HomeViewModel(
     fun refresh(place: PlaceEntity, force: Boolean = false) {
         if (place.id in _refreshing.value) return
         val cached = weather.value[place.id]
-        if (!force && cached != null && !weatherRepo.isStale(cached.fetchedAt)) return
+        val s = settings.value
+        val altitudeMissing = s.mountainEnabled && cached?.altitudeMeters != s.mountainAltitude
+        if (!force && cached != null && !weatherRepo.isStale(cached.fetchedAt) && !altitudeMissing) return
         viewModelScope.launch {
             _refreshing.update { it + place.id }
             weatherRepo.refresh(place).onFailure {
