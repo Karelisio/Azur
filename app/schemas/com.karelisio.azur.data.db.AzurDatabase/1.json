@@ -1,0 +1,136 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "d8456cae6e925c84a2f772cdf6b8cba4",
+    "entities": [
+      {
+        "tableName": "places",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `region` TEXT, `country` TEXT, `countryCode` TEXT, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `elevation` REAL, `department` TEXT, `sortOrder` INTEGER NOT NULL, `isCurrent` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "region",
+            "columnName": "region",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "country",
+            "columnName": "country",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "countryCode",
+            "columnName": "countryCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elevation",
+            "columnName": "elevation",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "department",
+            "columnName": "department",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCurrent",
+            "columnName": "isCurrent",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "forecast_cache",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`placeId` INTEGER NOT NULL, `forecastJson` TEXT NOT NULL, `fetchedAt` INTEGER NOT NULL, `airJson` TEXT, `altitudeJson` TEXT, `altitude` INTEGER, `vigilanceJson` TEXT, PRIMARY KEY(`placeId`))",
+        "fields": [
+          {
+            "fieldPath": "placeId",
+            "columnName": "placeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forecastJson",
+            "columnName": "forecastJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airJson",
+            "columnName": "airJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "altitudeJson",
+            "columnName": "altitudeJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "altitude",
+            "columnName": "altitude",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "vigilanceJson",
+            "columnName": "vigilanceJson",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "placeId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd8456cae6e925c84a2f772cdf6b8cba4')"
+    ]
+  }
+}

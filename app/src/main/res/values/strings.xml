@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Azur</string>
+    <string name="tile_label">Azur</string>
+    <string name="widget_compact">Azur · Compact</string>
+    <string name="widget_hourly">Azur · Prochaines heures</string>
+    <string name="widget_week">Azur · Semaine</string>
+    <string name="widget_clock">Azur · Horloge et météo</string>
+    <string name="widget_rain">Azur · Pluie dans l\'heure</string>
+</resources>
