@@ -7,4 +7,9 @@
     <string name="widget_week">Azur · Semaine</string>
     <string name="widget_clock">Azur · Horloge et météo</string>
     <string name="widget_rain">Azur · Pluie dans l\'heure</string>
+    <string name="widget_compact_desc">Température et icône du temps</string>
+    <string name="widget_hourly_desc">Les 6 prochaines heures</string>
+    <string name="widget_week_desc">Prévisions des prochains jours</string>
+    <string name="widget_clock_desc">Heure, date et météo actuelle</string>
+    <string name="widget_rain_desc">Pluie quart d\'heure par quart d\'heure</string>
 </resources>

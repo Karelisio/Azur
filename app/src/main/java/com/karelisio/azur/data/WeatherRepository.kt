@@ -29,6 +29,8 @@ class WeatherRepository(
     private val db: AzurDatabase,
     private val api: OpenMeteoApi,
     private val settings: SettingsRepository,
+    /** Appelé après chaque mise à jour réussie (widgets, tuile). */
+    private val onUpdated: suspend () -> Unit = {},
 ) {
     fun observe(placeId: Long): Flow<PlaceWeather?> = db.cache().observe(placeId).map { it?.toWeather() }
 
@@ -67,6 +69,8 @@ class WeatherRepository(
                 ),
             )
         }
+        runCatching { onUpdated() }
+        Unit
     }
 
     suspend fun saveVigilance(placeId: Long, json: String?) {
